@@ -3,81 +3,126 @@ import api from "../../../utils/api";
 import Input from "../../form/Input";
 import styles from "./Profile.module.css";
 import formStyles from "../../form/Form.module.css";
+import useFlashMessage from "../../../hooks/useFlashMessage";
+import RoundedImage from "../../layout/RoundedImage";
 
 function Profile() {
-    const [user, setUser] = useState({});
-    const [token] = useState(localStorage.getItem("token") || "");
+  const [user, setUser] = useState({});
+  const [preview, setPreview] = useState();
+  const [token] = useState(localStorage.getItem("token") || "");
+  const { setFlashMessage } = useFlashMessage();
 
-    useEffect(() => {
-        api.get("/users/checkuser", {
-            headers: {
-                Authorization: `Bearer ${JSON.parse(token)}`,
-            },
-        }).then((response) => {
-            setUser(response.data);
-        });
-    }, [token]);
+  useEffect(() => {
+    api
+      .get("/users/checkuser", {
+        headers: {
+          Authorization: `Bearer ${JSON.parse(token)}`,
+        },
+      })
+      .then((response) => {
+        setUser(response.data);
+      });
+  }, [token]);
 
-    function onChangeHandler(e) {}
-    function onFileChange(e) {}
+  function onChangeHandler(e) {
+    setUser({ ...user, [e.target.name]: e.target.value });
+  }
 
-    return (
-        <section>
-            <div className={styles.profile_header}>
-                <h1>Perfil</h1>
-                <p>Avatar</p>
-            </div>
+  function onFileChange(e) {
+    setPreview(e.target.files[0]);
+    setUser({ ...user, [e.target.name]: e.target.files[0] });
+  }
 
-            <form className={formStyles.form_container}>
-                <Input
-                    text="Imagem"
-                    type="file"
-                    name="image"
-                    handleOnChange={onFileChange}
-                />
-                <Input
-                    text="E-mail"
-                    type="email"
-                    name="email"
-                    placeholder="Digite seu e-mail"
-                    handleOnChange={onChangeHandler}
-                    value={user.email || ""}
-                />
-                <Input
-                    text="Nome"
-                    type="text"
-                    name="name"
-                    placeholder="Digite seu nome"
-                    handleOnChange={onChangeHandler}
-                    value={user.name || ""}
-                />
-                <Input
-                    text="Telefone"
-                    type="text"
-                    name="phone"
-                    placeholder="Digite seu telefone"
-                    handleOnChange={onChangeHandler}
-                    value={user.phone || ""}
-                />
-                <Input
-                    text="Senha"
-                    type="password"
-                    name="password"
-                    placeholder="Digite sua senha"
-                    handleOnChange={onChangeHandler}
-                />
-                <Input
-                    text="Confirmação de senha"
-                    type="password"
-                    name="confirmpassword"
-                    placeholder="Confirme sua senha"
-                    handleOnChange={onChangeHandler}
-                />
+  async function submitHandler(e) {
+    e.preventDefault();
 
-                <input type="submit" value="Editar" />
-            </form>
-        </section>
-    );
+    let msgType = "success";
+    const formData = new FormData();
+
+    Object.keys(user).forEach((key) => formData.append(key, user[key]));
+
+    const data = await api
+      .patch(`/users/edit/${user._id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${JSON.parse(token)}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => response.data)
+      .catch((err) => {
+        msgType = "error";
+        return err.response.data;
+      });
+
+    setFlashMessage(data.message, msgType);
+  }
+
+  return (
+    <section>
+      <div className={styles.profile_header}>
+        <h1>Perfil</h1>
+        {(user.image || preview) && (
+          <RoundedImage
+            src={
+              preview
+                ? URL.createObjectURL(preview)
+                : `${process.env.REACT_APP_API}/images/users/${user.image}`
+            }
+            alt={user.name}
+          />
+        )}
+      </div>
+
+      <form className={formStyles.form_container} onSubmit={submitHandler}>
+        <Input
+          text="Imagem"
+          type="file"
+          name="image"
+          handleOnChange={onFileChange}
+        />
+        <Input
+          text="E-mail"
+          type="email"
+          name="email"
+          placeholder="Digite seu e-mail"
+          handleOnChange={onChangeHandler}
+          value={user.email || ""}
+        />
+        <Input
+          text="Nome"
+          type="text"
+          name="name"
+          placeholder="Digite seu nome"
+          handleOnChange={onChangeHandler}
+          value={user.name || ""}
+        />
+        <Input
+          text="Telefone"
+          type="text"
+          name="phone"
+          placeholder="Digite seu telefone"
+          handleOnChange={onChangeHandler}
+          value={user.phone || ""}
+        />
+        <Input
+          text="Senha"
+          type="password"
+          name="password"
+          placeholder="Digite sua senha"
+          handleOnChange={onChangeHandler}
+        />
+        <Input
+          text="Confirmação de senha"
+          type="password"
+          name="confirmpassword"
+          placeholder="Confirme sua senha"
+          handleOnChange={onChangeHandler}
+        />
+
+        <input type="submit" value="Editar" />
+      </form>
+    </section>
+  );
 }
 
 export default Profile;
