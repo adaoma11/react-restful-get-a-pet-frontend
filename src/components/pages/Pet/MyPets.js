@@ -12,7 +12,7 @@ import useFlashMessage from "../../../hooks/useFlashMessage";
 function MyPets() {
   const [token] = useState(localStorage.getItem("token") || "");
   const { setFlashMessage } = useFlashMessage();
-  const [pets, setPets] = useState([]);
+  const [pet, setPet] = useState([]);
 
   useEffect(() => {
     api
@@ -22,7 +22,7 @@ function MyPets() {
         },
       })
       .then((response) => {
-        setPets(response.data.pets);
+        setPet(response.data.pets);
       })
       .catch((err) => {});
   }, [token]);
@@ -37,8 +37,8 @@ function MyPets() {
         },
       })
       .then((response) => {
-        const updatedPets = pets.filter((pet) => pet._id !== id);
-        setPets(updatedPets);
+        const updatedPets = pet.filter((pet) => pet._id !== id);
+        setPet(updatedPets);
         return response.data;
       })
       .catch((err) => {
@@ -56,8 +56,8 @@ function MyPets() {
         <Link to="/pet/add">Cadastrar Pet</Link>
       </div>
       <div className={styles.petlist_container}>
-        {pets.length > 0 &&
-          pets.map((pet) => (
+        {pet.length > 0 &&
+          pet.map((pet) => (
             <div className={styles.petlist_row} key={pet._id}>
               <RoundedImage
                 src={`${process.env.REACT_APP_API}/images/pets/${pet.images[0]}`}
@@ -88,7 +88,7 @@ function MyPets() {
               </div>
             </div>
           ))}
-        {pets.length === 0 && <p>Ainda não existem Pets cadastrados</p>}
+        {pet.length === 0 && <p>Ainda não existem Pets cadastrados</p>}
       </div>
     </section>
   );

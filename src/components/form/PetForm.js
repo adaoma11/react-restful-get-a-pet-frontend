@@ -34,7 +34,6 @@ function PetForm({ submitHandler, petData, btnText }) {
 
   function submit(e) {
     e.preventDefault();
-    console.log(pet);
     submitHandler(pet);
   }
 
