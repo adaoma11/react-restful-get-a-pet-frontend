@@ -6,14 +6,14 @@ import formStyles from "./Form.module.css";
 function PetForm({ submitHandler, petData, btnText }) {
   const [pet, setPet] = useState(petData || {});
   const [preview, setPreview] = useState([]);
-  const species = ["Cachorro", "Gato"];
+  const species = ["cão", "gato"];
   const colors = [
-    "Branco",
-    "Preto",
-    "Cinza",
-    "Caramelo",
-    "Bicolor",
-    "Tricolor",
+    "branco",
+    "preto",
+    "cinza",
+    "caramelo",
+    "bicolor",
+    "tricolor",
   ];
 
   function onFileChange(e) {
@@ -82,7 +82,7 @@ function PetForm({ submitHandler, petData, btnText }) {
       <Select
         text="Sexo"
         name="gender"
-        options={["Macho", "Fêmea"]}
+        options={["macho", "fêmea"]}
         handleOnChange={optionChangeHandler}
         value={pet.gender || ""}
       />
