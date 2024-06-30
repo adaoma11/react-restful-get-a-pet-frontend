@@ -23,6 +23,26 @@ function PetDetails() {
       });
   }, [id]);
 
+  async function schedule() {
+    let msgType = "success";
+
+    const data = await api
+      .patch(`pets/schedule/${pet._id}`, {
+        headers: {
+          Authorization: `Bearer: ${JSON.parse(token)}`,
+        },
+      })
+      .then((response) => {
+        return response.data;
+      })
+      .catch((err) => {
+        msgType = "error";
+        return err.response.data;
+      });
+
+    setFlashMessage(data.message, msgType);
+  }
+
   return (
     <>
       {pet.name && (
@@ -32,7 +52,7 @@ function PetDetails() {
 
             <p>
               Agende uma visita para conhecê-l
-              {pet.gender == "fêmea" ? "a" : "o"}
+              {pet.gender === "fêmea" ? "a" : "o"}
             </p>
           </div>
 
@@ -67,7 +87,7 @@ function PetDetails() {
           </p>
 
           {token ? (
-            <button>Solicitar visita</button>
+            <button onClick={schedule}>Solicitar visita</button>
           ) : (
             <p>
               Você precisa estar logado para solicitar uma visita.
